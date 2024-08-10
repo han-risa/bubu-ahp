@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dataset;
+use App\Models\Desain;
 use Illuminate\Http\Request;
 
 class DatasetController extends Controller
@@ -17,5 +18,11 @@ class DatasetController extends Controller
     {
         $data = Dataset::all();
         return $data;
+    }
+
+    public function create()
+    {
+        $data = Desain::all();
+        return view('dataset_create', compact('data'));
     }
 }

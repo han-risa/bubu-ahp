@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Desain;
 
 class DesainSeeder extends Seeder
 {
@@ -14,6 +15,8 @@ class DesainSeeder extends Seeder
      */
     public function run()
     {
-        //
+        Desain::factory()
+            ->count(20)
+            ->create();
     }
 }

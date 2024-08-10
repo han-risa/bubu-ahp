@@ -22,9 +22,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function() {
         return view('dashboard');
     })->name('dashboard');
     Route::get('/dataset', [DatasetController::class, 'index'])->name('dataset');
-    Route::get('/dataset/create', function () {
-        return view('formDataset');
-    });
+    Route::get('/dataset/create', [DatasetController::class, 'create'])->name('dataset.create');
     Route::group(['prefix' => 'components', 'as' => 'components.'], function() {
         Route::get('/alert', function () {
             return view('admin.component.alert');

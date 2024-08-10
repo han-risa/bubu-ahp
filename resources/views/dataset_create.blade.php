@@ -1,5 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
+        <link rel="stylesheet" href="{{ asset('vendors/choices.js/choices.min.css') }}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
                 <h3>Dataset</h3>
@@ -23,7 +25,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Multiple Column</h4>
+                        <h4 class="card-title">Form Input</h4>
                     </div>
                     <div class="card-content">
                         <div class="card-body">
@@ -31,52 +33,33 @@
                                 <div class="row">
                                     <div class="col-md-6 col-12">
                                         <div class="form-group">
-                                            <label for="first-name-column">First Name</label>
-                                            <input type="text" id="first-name-column" class="form-control"
-                                                placeholder="First Name" name="fname-column">
+                                            <label for="nama-desain">Nama Desain</label>
+                                            <select class="choices form-select" id="nama-choice">
+                                                <option value="" selected>Pilih Desain</option>
+                                                @foreach ($data as $item)
+                                                    <option value="{{ $item->id }}">{{ $item->nama }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-12">
                                         <div class="form-group">
-                                            <label for="last-name-column">Last Name</label>
+                                            <label for="terjual">Jumlah Terjual</label>
                                             <input type="text" id="last-name-column" class="form-control"
-                                                placeholder="Last Name" name="lname-column">
+                                                placeholder="Masukkan jumlah terjual" name="lname-column">
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-12">
                                         <div class="form-group">
-                                            <label for="city-column">City</label>
-                                            <input type="text" id="city-column" class="form-control" placeholder="City"
+                                            <label for="pembeli">Jumlah Pembeli</label>
+                                            <input type="text" id="city-column" class="form-control" placeholder="Masukkan jumlah pembeli"
                                                 name="city-column">
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-12">
                                         <div class="form-group">
-                                            <label for="country-floating">Country</label>
-                                            <input type="text" id="country-floating" class="form-control"
-                                                name="country-floating" placeholder="Country">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-12">
-                                        <div class="form-group">
-                                            <label for="company-column">Company</label>
-                                            <input type="text" id="company-column" class="form-control"
-                                                name="company-column" placeholder="Company">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-12">
-                                        <div class="form-group">
-                                            <label for="email-id-column">Email</label>
-                                            <input type="email" id="email-id-column" class="form-control"
-                                                name="email-id-column" placeholder="Email">
-                                        </div>
-                                    </div>
-                                    <div class="form-group col-12">
-                                        <div class='form-check'>
-                                            <div class="checkbox">
-                                                <input type="checkbox" id="checkbox5" class='form-check-input' checked>
-                                                <label for="checkbox5">Remember Me</label>
-                                            </div>
+                                            <label for="bulan">Bulan Penjualan</label>
+                                            <input type="date" class="form-control" placeholder="Select date..">
                                         </div>
                                     </div>
                                     <div class="col-12 d-flex justify-content-end">
@@ -91,5 +74,19 @@
             </div>
         </div>
     </section>
-    <!-- // Basic multiple Column Form section end -->
+    <script src="{{ asset('vendors/choices.js/choices.min.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var choices = new Choices('#nama-choice');
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            flatpickr('#bulan-penjualan', {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+            });
+        });
+    </script>
 </x-app-layout>

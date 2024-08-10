@@ -17,7 +17,7 @@ class DesainFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'nama' => $this->faker->numerify('Desain-##'),
         ];
     }
 }
