@@ -29,12 +29,12 @@
                     </div>
                     <div class="card-content">
                         <div class="card-body">
-                            <form class="form">
+                            <form class="form" action={{ route('dataset.store') }}>
                                 <div class="row">
                                     <div class="col-md-6 col-12">
                                         <div class="form-group">
                                             <label for="nama-desain">Nama Desain</label>
-                                            <select class="choices form-select" id="nama-choice">
+                                            <select class="choices form-select" id="desain">
                                                 <option value="" selected>Pilih Desain</option>
                                                 @foreach ($data as $item)
                                                     <option value="{{ $item->id }}">{{ $item->nama }}</option>
@@ -45,21 +45,21 @@
                                     <div class="col-md-6 col-12">
                                         <div class="form-group">
                                             <label for="terjual">Jumlah Terjual</label>
-                                            <input type="text" id="last-name-column" class="form-control"
+                                            <input type="text" id="terjual" class="form-control"
                                                 placeholder="Masukkan jumlah terjual" name="lname-column">
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-12">
                                         <div class="form-group">
                                             <label for="pembeli">Jumlah Pembeli</label>
-                                            <input type="text" id="city-column" class="form-control" placeholder="Masukkan jumlah pembeli"
+                                            <input type="text" id="pembeli" class="form-control" placeholder="Masukkan jumlah pembeli"
                                                 name="city-column">
                                         </div>
                                     </div>
                                     <div class="col-md-6 col-12">
                                         <div class="form-group">
                                             <label for="bulan">Bulan Penjualan</label>
-                                            <input type="date" class="form-control" placeholder="Select date..">
+                                            <input type="date" class="form-control" placeholder="Select date.." id="bulan">
                                         </div>
                                     </div>
                                     <div class="col-12 d-flex justify-content-end">

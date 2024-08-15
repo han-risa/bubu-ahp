@@ -18,13 +18,25 @@
 
     <section class="section">
         <div class="card">
-            <div class="card-header">
-                <h4 class="card-title">Dataset</h4>
-            </div>
             <div class="card-body">
-                Tolong aku, aku disuruh ngerjain websitenya <br>
-                - han-risa
+                <div class="row d-flex justify-content-center align-items-center">
+                    <div class="col-md-5 col-12 d-flex justify-content-center">
+                        <button class="btn btn-primary col-md-5">
+                            <a href="#" class="text-white" style="font-size: 20px">
+                                <i class="bi bi-clipboard-plus-fill" style="font-size: 100px"></i><br>Perangkingan Baru
+                            </a>
+                        </button>
+                    </div>
+                    <div class="col-md-5 col-12 d-flex justify-content-center">
+                        <button class="btn btn-primary col-md-5">
+                            <a href="/dataset" class="text-white" style="font-size: 20px">
+                                <i class="bi bi-clipboard-data-fill" style="font-size: 100px"></i><br>Riwayat Perankingan
+                            </a>
+                        </button>
+                    </div>
+                </div>
             </div>
+
         </div>
     </section>
 </x-app-layout>

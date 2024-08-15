@@ -21,8 +21,11 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function() {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    Route::resource('dataset', DatasetController::class);
     Route::get('/dataset', [DatasetController::class, 'index'])->name('dataset');
-    Route::get('/dataset/create', [DatasetController::class, 'create'])->name('dataset.create');
+    Route::get('/dataset/create', [DatasetController::class, 'create'])->name('dataset.add');
+
     Route::group(['prefix' => 'components', 'as' => 'components.'], function() {
         Route::get('/alert', function () {
             return view('admin.component.alert');
@@ -30,9 +33,5 @@ Route::group(['middleware' => ['auth:sanctum', 'verified']], function() {
         Route::get('/accordion', function () {
             return view('admin.component.accordion');
         })->name('accordion');
-    });
-
-    Route::group(['prefix' => 'api', 'as' => 'api.'], function() {
-        Route::get('/dataset-all', 'DatasetController@getAllData')->name('get-dataset-all');
     });
 });
