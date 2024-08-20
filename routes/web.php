@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DatasetController;
+use App\Http\Controllers\DesainController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,23 +16,23 @@ use App\Http\Controllers\DatasetController;
 */
 
 Route::get('/', function () {
-    return view('auth.login');
-});
-Route::group(['middleware' => ['auth:sanctum', 'verified']], function() {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    return view('dashboard');
+})->name('home');
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->name('dashboard');
 
-    Route::resource('dataset', DatasetController::class);
-    Route::get('/dataset', [DatasetController::class, 'index'])->name('dataset');
-    Route::get('/dataset/create', [DatasetController::class, 'create'])->name('dataset.add');
+Route::resource('dataset', DatasetController::class);
+Route::get('/dataset', [DatasetController::class, 'index'])->name('dataset');
+Route::get('/dataset/create', [DatasetController::class, 'create'])->name('dataset.add');
 
-    Route::group(['prefix' => 'components', 'as' => 'components.'], function() {
-        Route::get('/alert', function () {
-            return view('admin.component.alert');
-        })->name('alert');
-        Route::get('/accordion', function () {
-            return view('admin.component.accordion');
-        })->name('accordion');
-    });
+Route::resource('desain', DesainController::class);
+
+Route::group(['prefix' => 'components', 'as' => 'components.'], function () {
+Route::get('/alert', function () {
+return view('admin.component.alert');
+})->name('alert');
+Route::get('/accordion', function () {
+return view('admin.component.accordion');
+})->name('accordion');
 });

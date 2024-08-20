@@ -4,14 +4,14 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
-                <h3>Dataset</h3>
+                <h3>Desain</h3>
                 <p class="text-subtitle text-muted"></p>
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href={{ route('dataset') }}>Dataset</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Create</li>
+                        <li class="breadcrumb-item"><a href={{ route('desain.index') }}>Desain</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Edit</li>
                     </ol>
                 </nav>
             </div>
@@ -25,41 +25,17 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Form Input</h4>
+                        <h4 class="card-title">Form Edit</h4>
                     </div>
                     <div class="card-content">
                         <div class="card-body">
-                            <form class="form" action={{ route('dataset.store') }}>
+                            <form class="form" action="{{ route('desain.update', $data->id)}}" method="PUT">
+                                @csrf
                                 <div class="row">
                                     <div class="col-md-6 col-12">
                                         <div class="form-group">
-                                            <label for="nama-desain">Nama Desain</label>
-                                            <select class="choices form-select" id="desain">
-                                                <option value="" selected>Pilih Desain</option>
-                                                @foreach ($data as $item)
-                                                    <option value="{{ $item->id }}">{{ $item->nama }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-12">
-                                        <div class="form-group">
-                                            <label for="terjual">Jumlah Terjual</label>
-                                            <input type="text" id="terjual" class="form-control"
-                                                placeholder="Masukkan jumlah terjual" name="lname-column">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-12">
-                                        <div class="form-group">
-                                            <label for="pembeli">Jumlah Pembeli</label>
-                                            <input type="text" id="pembeli" class="form-control" placeholder="Masukkan jumlah pembeli"
-                                                name="city-column">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 col-12">
-                                        <div class="form-group">
-                                            <label for="bulan">Bulan Penjualan</label>
-                                            <input type="date" class="form-control" placeholder="Select date.." id="bulan">
+                                            <label for="nama_desain">Nama Desain</label>
+                                            <input type="text" id="nama_desain" class="form-control" value={{ $data->nama_desain }} name="nama_desain">
                                         </div>
                                     </div>
                                     <div class="col-12 d-flex justify-content-end">
