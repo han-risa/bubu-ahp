@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Desain extends Model
+class SkorBobot extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'nama_desain',
+        'id_kriteria',
+        'id_bulan',
+        'skor_bobot',
     ];
 }

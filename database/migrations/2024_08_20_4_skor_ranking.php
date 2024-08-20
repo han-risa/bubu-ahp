@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('skor_rankings', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('desain_id');
+            $table->unsignedBigInteger('bulan_id');
+            $table->double('skor_ranking');
+            $table->integer('posisi_ranking');
+            $table->timestamps();
+
+            // Foreign Key Constraints
+            $table->foreign('desain_id')->references('id')->on('desains')->onDelete('cascade');
+            $table->foreign('bulan_id')->references('id')->on('bulan_rankings')->onDelete('cascade');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('skor_rankings');
+    }
+};
