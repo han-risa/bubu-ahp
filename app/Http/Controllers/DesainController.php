@@ -63,10 +63,11 @@ class DesainController extends Controller
         return redirect()->route('desain.index');
     }
 
-    // public function show($id)
-    // {
-    //     $data = Desain::find($id);
-    //     return view('desain.desain_show', compact('data'));
-    // }
+    public function show($id)
+    {
+        $datas = Desain::find($id);
+        $data = Desain::all();
+        return view('desain.desain', compact('data', 'datas'));
+    }
 
 }

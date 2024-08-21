@@ -29,13 +29,14 @@
                     </div>
                     <div class="card-content">
                         <div class="card-body">
-                            <form class="form" action="{{ route('desain.update', $data->id)}}" method="PUT">
+                            <form class="form" action="{{ route('desain.update', $data->id)}}" method="POST">
                                 @csrf
+                                @method('PUT') <!-- Add this line to spoof the PUT request -->
                                 <div class="row">
                                     <div class="col-md-6 col-12">
                                         <div class="form-group">
                                             <label for="nama_desain">Nama Desain</label>
-                                            <input type="text" id="nama_desain" class="form-control" value={{ $data->nama_desain }} name="nama_desain">
+                                            <input type="text" id="nama_desain" class="form-control" value="{{ $data->nama_desain }}" name="nama_desain">
                                         </div>
                                     </div>
                                     <div class="col-12 d-flex justify-content-end">
@@ -50,6 +51,13 @@
             </div>
         </div>
     </section>
+    <script>
+        // Convert the PHP variable to a JavaScript object
+        let desainData = @json($data);
+
+        // Log the data to the browser console
+        console.log(desainData);
+    </script>
     <script src="{{ asset('vendors/choices.js/choices.min.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
