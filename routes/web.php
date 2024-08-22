@@ -27,4 +27,5 @@ Route::get('/dashboard', function () {
 Route::resource('desain', DesainController::class);
 
 Route::get('/ranking-desain', [RankingController::class, 'rankingDesain'])->name('ranking.index');
+Route::post('/ranking-desain-testinput', [RankingController::class, 'bulkAction'])->name('ranking.bulkAction');
 

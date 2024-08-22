@@ -15,8 +15,11 @@ class DesainSeeder extends Seeder
      */
     public function run()
     {
-        Desain::factory()
-            ->count(20)
-            ->create();
+        // Make a loop of # amount of Desain with the 'nama_desain' is 'Desain #'
+        for ($i = 1; $i <= 20; $i++) {
+            Desain::create([
+                'nama_desain' => 'Desain ' . $i,
+            ]);
+        }
     }
 }

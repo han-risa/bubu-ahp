@@ -18,25 +18,51 @@
 
     <section class="section">
         <div class="card">
-            <div class="card-body">
-                <div class="row d-flex justify-content-center align-items-center">
-                    <div class="col-md-5 col-12 d-flex justify-content-center">
-                        <button class="btn btn-primary col-md-5">
-                            <a href="#" class="text-white" style="font-size: 20px">
-                                <i class="bi bi-clipboard-plus-fill" style="font-size: 100px"></i><br>Perangkingan Baru
-                            </a>
-                        </button>
-                    </div>
-                    <div class="col-md-5 col-12 d-flex justify-content-center">
-                        <button class="btn btn-primary col-md-5">
-                            <a href="/dataset" class="text-white" style="font-size: 20px">
-                                <i class="bi bi-clipboard-data-fill" style="font-size: 100px"></i><br>Riwayat Perankingan
-                            </a>
-                        </button>
-                    </div>
-                </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title">Daftar Desain</h5>
             </div>
+            <div class="card-body">
+                <form action="{{ route('ranking.bulkAction') }}" method="POST">
+                    @csrf
+                    <table class="table table-striped" id="table1">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Nama Desain</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($desain as $index => $item)
+                                @if($index % 3 == 0)
+                                    <tr>
+                                @endif
 
+                                <td style="text-align: center;">
+                                    <input type="checkbox" name="desain_ids[]" value="{{ $item->id }}" class="form-check-input">
+                                </td>
+                                <td style="text-align: center;">{{ $item->nama_desain }}</td>
+
+                                @if(($index + 1) % 3 == 0)
+                                    </tr>
+                                @endif
+                            @endforeach
+
+                            {{-- Close the last row and distribute empty columns evenly --}}
+                            @if(count($desain) % 3 != 0)
+                                @for($i = 0; $i < 3 - (count($desain) % 3); $i++)
+                                    <td></td>
+                                    <td></td>
+                                @endfor
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-danger">Apply Bulk Action</button>
+                    </div>
+                </form>
+
+            </div>
         </div>
     </section>
 </x-app-layout>
