@@ -29,4 +29,5 @@ Route::resource('desain', DesainController::class);
 Route::get('/ranking-desain', [RankingController::class, 'rankingDesain'])->name('ranking.index');
 Route::post('/ranking-desain-testinput', [RankingController::class, 'bulkAction'])->name('ranking.bulkAction');
 Route::post('/ranking-process', [RankingController::class, 'process'])->name('ranking.process');
+Route::get('/ranking-entropy', [RankingController::class, 'entropy'])->name('ranking.entropy');
 

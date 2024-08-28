@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use App\Models\Desain;
+use App\Models\Dataset;
 use Illuminate\Support\Facades\Log;
 
 class RankingController extends Controller
@@ -73,5 +74,150 @@ class RankingController extends Controller
 
         return redirect()->route('ranking.index')->with('success', 'Data has been processed successfully.');
     }
+
+    public function entropy(Request $request)
+{
+    $dataset = Dataset::all();
+
+    // Convert the dataset to an array
+    $dataset = $dataset->toArray();
+
+    // Initialize arrays for jumlah_terjual, jumlah_pembeli, and omset
+    $jumlahTerjuals = [];
+    $jumlahPembelis = [];
+    $omsets = [];
+
+    // Loop through the dataset and populate the arrays
+    foreach ($dataset as $data) {
+        $jumlahTerjuals[] = $data['jumlah_terjual'];
+        $jumlahPembelis[] = $data['jumlah_pembeli'];
+        $omsets[] = $data['omset'];
+    }
+
+    // Function to calculate the average value of an array
+    function calculateAverage($array) {
+        // Check if the array is empty
+        if (count($array) === 0) {
+            return 0;
+        }
+
+        // Calculate the average
+        $sum = array_sum($array);
+        $average = $sum / count($array);
+
+        return $average;
+    }
+
+    function zscore(array $data)
+    {
+        // Calculate the mean
+        $mean = array_sum($data) / count($data);
+
+        // Calculate the squared differences
+        $squaredDifferences = array_map(function($value) use ($mean) {
+            return pow($value - $mean, 2);
+        }, $data);
+
+        // Calculate the standard deviation
+        $standardDeviation = sqrt(array_sum($squaredDifferences) / (count($data) - 1));
+
+        // Calculate the Z-Scores
+        $zScores = array_map(function($value) use ($mean, $standardDeviation) {
+            return ($standardDeviation != 0) ? ($value - $mean) / $standardDeviation : 0;
+        }, $data);
+
+        return $zScores;
+    }
+
+    function shiftNormalization(array $zScores)
+    {
+        // Find the minimum Z-Score
+        $minZScore = min($zScores);
+        $shiftValue = abs($minZScore) + 1;
+
+        $shiftedScores = array_map(function($zScore) use ($shiftValue) {
+            return $zScore + $shiftValue;
+        }, $zScores);
+
+        return $shiftedScores;
+    }
+
+    function calculateEntropySingle(array $data)
+    {
+        $n = count($data);  // Number of data points
+        if ($n === 0) {
+            return 0;
+        }
+
+        $k = 1 / log($n);
+        $sumPLogP = 0;
+
+        foreach ($data as $pij) {
+            $sumPLogP += ($pij > 0) ? $pij * log($pij) : 0; // Avoid log(0)
+        }
+
+        $entropy = -$k * $sumPLogP;
+
+        return $entropy;
+    }
+
+    function calculateWeight(array $entropies)
+    {
+
+        $divergence = array_map(function($e) {
+            return 1 - $e;
+        }, $entropies);
+
+
+        $sumDivergence = array_sum($divergence);
+        $weights = array_map(function($d) use ($sumDivergence) {
+            return $d / $sumDivergence;
+        }, $divergence);
+
+        return $weights;
+    }
+
+
+    // Calculate averages for each group
+    $averageJumlahTerjuals = calculateAverage($jumlahTerjuals);
+    $averageJumlahPembelis = calculateAverage($jumlahPembelis);
+    $averageOmsets = calculateAverage($omsets);
+
+    // Calculate Z-Score
+    $zscoreJumlahTerjuals = zscore($jumlahTerjuals);
+    $zscoreJumlahPembelis = zscore($jumlahPembelis);
+    $zscoreOmsets = zscore($omsets);
+
+    // Calculate Shift Normalization
+    $shiftedJumlahTerjuals = shiftNormalization($zscoreJumlahTerjuals);
+    $shiftedJumlahPembelis = shiftNormalization($zscoreJumlahPembelis);
+    $shiftedOmsets = shiftNormalization($zscoreOmsets);
+
+    // Calculate Entropy
+    $entropies[0] = calculateEntropySingle($shiftedJumlahTerjuals);
+    $entropies[1] = calculateEntropySingle($shiftedJumlahPembelis);
+    $entropies[2] = calculateEntropySingle($shiftedOmsets);
+
+    // Calculate Weights
+    $weights = calculateWeight($entropies);
+
+    // Log the results
+    Log::info('Z-Score Jumlah Terjuals:', $zscoreJumlahTerjuals);
+    Log::info('Z-Score Jumlah Pembelis:', $zscoreJumlahPembelis);
+    Log::info('Z-Score Omsets:', $zscoreOmsets);
+    Log::info('Shifted Jumlah Terjuals:', $shiftedJumlahTerjuals);
+    Log::info('Shifted Jumlah Pembelis:', $shiftedJumlahPembelis);
+    Log::info('Shifted Omsets:', $shiftedOmsets);
+    Log::info('Entropies:', $entropies);
+    Log::info('Weights:', $weights);
+
+
+    // Output the results
+    echo "Average Jumlah Terjuals: " . $averageJumlahTerjuals . "\n";
+    echo "Average Jumlah Pembelis: " . $averageJumlahPembelis . "\n";
+    echo "Average Omsets: " . $averageOmsets . "\n";
+}
+
+
 
 }
