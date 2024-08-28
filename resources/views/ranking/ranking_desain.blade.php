@@ -40,7 +40,7 @@
                                 <td style="text-align: center;">
                                     <input type="checkbox" name="desain_ids[]" value="{{ $item->id }}" class="form-check-input">
                                 </td>
-                                <td style="text-align: center;">{{ $item->nama_desain }}</td>
+                                <td style="text-align: left;">{{ $item->nama_desain }}</td>
 
                                 @if(($index + 1) % 3 == 0)
                                     </tr>

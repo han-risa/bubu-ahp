@@ -5,7 +5,7 @@
         </div>
         <div class="float-end">
             <p>Crafted with <span class="text-danger"><i class="bi bi-heart-fill icon-mid"></i></span>
-                by <a href="">Haarisah</a></p>
+                by <a href="https://github.com/haarisahjufri0311">Haarisah</a></p>
         </div>
     </div>
 </footer>
