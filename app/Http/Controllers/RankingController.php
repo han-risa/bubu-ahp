@@ -76,148 +76,312 @@ class RankingController extends Controller
     }
 
     public function entropy(Request $request)
-{
-    $dataset = Dataset::all();
+    {
+        $dataset = Dataset::all();
 
-    // Convert the dataset to an array
-    $dataset = $dataset->toArray();
+        // Convert the dataset to an array
+        $dataset = $dataset->toArray();
 
-    // Initialize arrays for jumlah_terjual, jumlah_pembeli, and omset
-    $jumlahTerjuals = [];
-    $jumlahPembelis = [];
-    $omsets = [];
+        // Initialize arrays for jumlah_terjual, jumlah_pembeli, and omset
+        $jumlahTerjuals = [];
+        $jumlahPembelis = [];
+        $omsets = [];
 
-    // Loop through the dataset and populate the arrays
-    foreach ($dataset as $data) {
-        $jumlahTerjuals[] = $data['jumlah_terjual'];
-        $jumlahPembelis[] = $data['jumlah_pembeli'];
-        $omsets[] = $data['omset'];
-    }
-
-    // Function to calculate the average value of an array
-    function calculateAverage($array) {
-        // Check if the array is empty
-        if (count($array) === 0) {
-            return 0;
+        // Loop through the dataset and populate the arrays
+        foreach ($dataset as $data) {
+            $jumlahTerjuals[] = $data['jumlah_terjual'];
+            $jumlahPembelis[] = $data['jumlah_pembeli'];
+            $omsets[] = $data['omset'];
         }
 
-        // Calculate the average
-        $sum = array_sum($array);
-        $average = $sum / count($array);
+        // Function to calculate the average value of an array
+        function calculateAverage($array) {
+            // Check if the array is empty
+            if (count($array) === 0) {
+                return 0;
+            }
 
-        return $average;
-    }
+            // Calculate the average
+            $sum = array_sum($array);
+            $average = $sum / count($array);
 
-    function zscore(array $data)
-    {
-        // Calculate the mean
-        $mean = array_sum($data) / count($data);
-
-        // Calculate the squared differences
-        $squaredDifferences = array_map(function($value) use ($mean) {
-            return pow($value - $mean, 2);
-        }, $data);
-
-        // Calculate the standard deviation
-        $standardDeviation = sqrt(array_sum($squaredDifferences) / (count($data) - 1));
-
-        // Calculate the Z-Scores
-        $zScores = array_map(function($value) use ($mean, $standardDeviation) {
-            return ($standardDeviation != 0) ? ($value - $mean) / $standardDeviation : 0;
-        }, $data);
-
-        return $zScores;
-    }
-
-    function shiftNormalization(array $zScores)
-    {
-        // Find the minimum Z-Score
-        $minZScore = min($zScores);
-        $shiftValue = abs($minZScore) + 1;
-
-        $shiftedScores = array_map(function($zScore) use ($shiftValue) {
-            return $zScore + $shiftValue;
-        }, $zScores);
-
-        return $shiftedScores;
-    }
-
-    function calculateEntropySingle(array $data)
-    {
-        $n = count($data);  // Number of data points
-        if ($n === 0) {
-            return 0;
+            return $average;
         }
 
-        $k = 1 / log($n);
-        $sumPLogP = 0;
+        function zscore(array $data)
+        {
+            // Calculate the mean
+            $mean = array_sum($data) / count($data);
 
-        foreach ($data as $pij) {
-            $sumPLogP += ($pij > 0) ? $pij * log($pij) : 0; // Avoid log(0)
+            // Calculate the squared differences
+            $squaredDifferences = array_map(function($value) use ($mean) {
+                return pow($value - $mean, 2);
+            }, $data);
+
+            // Calculate the standard deviation
+            $standardDeviation = sqrt(array_sum($squaredDifferences) / (count($data) - 1));
+
+            // Calculate the Z-Scores
+            $zScores = array_map(function($value) use ($mean, $standardDeviation) {
+                return ($standardDeviation != 0) ? ($value - $mean) / $standardDeviation : 0;
+            }, $data);
+
+            return $zScores;
         }
 
-        $entropy = -$k * $sumPLogP;
+        function shiftNormalization(array $zScores)
+        {
+            // Find the minimum Z-Score
+            $minZScore = min($zScores);
+            $shiftValue = abs($minZScore) + 1;
 
-        return $entropy;
+            $shiftedScores = array_map(function($zScore) use ($shiftValue) {
+                return $zScore + $shiftValue;
+            }, $zScores);
+
+            return $shiftedScores;
+        }
+
+        function calculateEntropySingle(array $data)
+        {
+            $n = count($data);  // Number of data points
+            if ($n === 0) {
+                return 0;
+            }
+
+            $k = 1 / log($n);
+            $sumPLogP = 0;
+
+            foreach ($data as $pij) {
+                $sumPLogP += ($pij > 0) ? $pij * log($pij) : 0; // Avoid log(0)
+            }
+
+            $entropy = -$k * $sumPLogP;
+
+            return $entropy;
+        }
+
+        function calculateWeight(array $entropies)
+        {
+
+            $divergence = array_map(function($e) {
+                return 1 - $e;
+            }, $entropies);
+
+
+            $sumDivergence = array_sum($divergence);
+            $weights = array_map(function($d) use ($sumDivergence) {
+                return $d / $sumDivergence;
+            }, $divergence);
+
+            return $weights;
+        }
+
+
+        // Calculate averages for each group
+        $averageJumlahTerjuals = calculateAverage($jumlahTerjuals);
+        $averageJumlahPembelis = calculateAverage($jumlahPembelis);
+        $averageOmsets = calculateAverage($omsets);
+
+        // Calculate Z-Score
+        $zscoreJumlahTerjuals = zscore($jumlahTerjuals);
+        $zscoreJumlahPembelis = zscore($jumlahPembelis);
+        $zscoreOmsets = zscore($omsets);
+
+        // Calculate Shift Normalization
+        $shiftedJumlahTerjuals = shiftNormalization($zscoreJumlahTerjuals);
+        $shiftedJumlahPembelis = shiftNormalization($zscoreJumlahPembelis);
+        $shiftedOmsets = shiftNormalization($zscoreOmsets);
+
+        // Calculate Entropy
+        $entropies[0] = calculateEntropySingle($shiftedJumlahTerjuals);
+        $entropies[1] = calculateEntropySingle($shiftedJumlahPembelis);
+        $entropies[2] = calculateEntropySingle($shiftedOmsets);
+
+        // Calculate Weights
+        $weights = calculateWeight($entropies);
+
+        // Log the results
+        Log::info('Z-Score Jumlah Terjuals:', $zscoreJumlahTerjuals);
+        Log::info('Z-Score Jumlah Pembelis:', $zscoreJumlahPembelis);
+        Log::info('Z-Score Omsets:', $zscoreOmsets);
+        Log::info('Shifted Jumlah Terjuals:', $shiftedJumlahTerjuals);
+        Log::info('Shifted Jumlah Pembelis:', $shiftedJumlahPembelis);
+        Log::info('Shifted Omsets:', $shiftedOmsets);
+        Log::info('Entropies:', $entropies);
+        Log::info('Weights:', $weights);
+
+
+        // Output the results
+        echo "Average Jumlah Terjuals: " . $averageJumlahTerjuals . "\n";
+        echo "Average Jumlah Pembelis: " . $averageJumlahPembelis . "\n";
+        echo "Average Omsets: " . $averageOmsets . "\n";
+
+        return redirect()->route('ranking.ahp', compact('weights'));
     }
 
-    function calculateWeight(array $entropies)
+    public function ahp(Request $request)
     {
+        $alternatives =  Dataset::all();
 
-        $divergence = array_map(function($e) {
-            return 1 - $e;
-        }, $entropies);
+        //log the request
+        Log::info('Request:', $request->all());
 
 
-        $sumDivergence = array_sum($divergence);
-        $weights = array_map(function($d) use ($sumDivergence) {
-            return $d / $sumDivergence;
-        }, $divergence);
+        $alternativesMatrix = [
+            'jumlah_terjual' => [],
+            'jumlah_pembeli' => [],
+            'omset' => []
+        ];
 
-        return $weights;
+        // Function to convert jumlah_terjual to score
+        function convertJumlahTerjual($jumlah_terjual) {
+            if ($jumlah_terjual < 400) return 1;
+            if ($jumlah_terjual < 800) return 3;
+            if ($jumlah_terjual < 1200) return 5;
+            if ($jumlah_terjual < 1600) return 7;
+            return 9;
+        }
+
+        // Function to convert jumlah_pembeli to score
+        function convertJumlahPembeli($jumlah_pembeli) {
+            if ($jumlah_pembeli < 25) return 1;
+            if ($jumlah_pembeli < 50) return 3;
+            if ($jumlah_pembeli < 75) return 5;
+            if ($jumlah_pembeli < 100) return 7;
+            return 9;
+        }
+
+        // Function to convert omset to score
+        function convertOmset($omset) {
+            if ($omset < 3000000) return 1;
+            if ($omset < 7000000) return 3;
+            if ($omset < 11000000) return 5;
+            if ($omset < 15000000) return 7;
+            return 9;
+        }
+
+        // Convert and populate alternativesMatrix with scores
+        foreach ($alternatives as $i => $alternative) {
+            foreach ($alternatives as $j => $alt) {
+                // For jumlah_terjual
+                $num = convertJumlahTerjual($alternative['jumlah_terjual']);
+                $den = convertJumlahTerjual($alt['jumlah_terjual']);
+                if ($num > $den) {
+                    $result = $num / $den;
+                    $alternativesMatrix['jumlah_terjual'][$i][$j] = ceil($result) % 2 == 0 ? ceil($result) + 1 : ceil($result);
+                } else {
+                    $result = 1 / ceil($den / $num);
+                    $alternativesMatrix['jumlah_terjual'][$i][$j] = $result;
+                }
+
+                // For jumlah_pembeli
+                $num = convertJumlahPembeli($alternative['jumlah_pembeli']);
+                $den = convertJumlahPembeli($alt['jumlah_pembeli']);
+                if ($num > $den) {
+                    $result = $num / $den;
+                    $alternativesMatrix['jumlah_pembeli'][$i][$j] = ceil($result) % 2 == 0 ? ceil($result) + 1 : ceil($result);
+                } else {
+                    $result = 1 / ceil($den / $num);
+                    $alternativesMatrix['jumlah_pembeli'][$i][$j] = $result;
+                }
+
+                // For omset
+                $num = convertOmset($alternative['omset']);
+                $den = convertOmset($alt['omset']);
+                if ($num > $den) {
+                    $result = $num / $den;
+                    $alternativesMatrix['omset'][$i][$j] = ceil($result) % 2 == 0 ? ceil($result) + 1 : ceil($result);
+                } else {
+                    $result = 1 / ceil($den / $num);
+                    $alternativesMatrix['omset'][$i][$j] = $result;
+                }
+            }
+        }
+
+        // Log the alternativesMatrix
+        Log::info('Alternatives Matrix - Jumlah Terjual:', $alternativesMatrix['jumlah_terjual']);
+        Log::info('Alternatives Matrix - Jumlah Pembeli:', $alternativesMatrix['jumlah_pembeli']);
+        Log::info('Alternatives Matrix - Omset:', $alternativesMatrix['omset']);
+
+        // Optionally, you can also echo the matrices
+        echo "Alternatives Matrix - Jumlah Terjual:\n";
+        print_r($alternativesMatrix['jumlah_terjual']);
+
+        echo "Alternatives Matrix - Jumlah Pembeli:\n";
+        print_r($alternativesMatrix['jumlah_pembeli']);
+
+        echo "Alternatives Matrix - Omset:\n";
+        print_r($alternativesMatrix['omset']);
+
+        function normalizeMatrix($matrix)
+        {
+            $normalizedMatrix = [];
+            $columnSums = array_fill(0, count($matrix), 0);
+
+            foreach ($matrix as $row) {
+                foreach ($row as $j => $value) {
+                    $columnSums[$j] += $value;
+                }
+            }
+
+            foreach ($matrix as $i => $row) {
+                foreach ($row as $j => $value) {
+                    $normalizedMatrix[$i][$j] = $value / $columnSums[$j];
+                }
+            }
+
+            return $normalizedMatrix;
+        }
+
+        function calculatePriorityVector($matrix)
+        {
+            $priorityVector = [];
+
+            foreach ($matrix as $row) {
+                $priorityVector[] = array_sum($row) / count($row);
+            }
+
+            return $priorityVector;
+        }
+
+        // Normalize the matrices
+        $normalizedAlternativesMatrix = [
+            'jumlah_terjual' => normalizeMatrix($alternativesMatrix['jumlah_terjual']),
+            'jumlah_pembeli' => normalizeMatrix($alternativesMatrix['jumlah_pembeli']),
+            'omset' => normalizeMatrix($alternativesMatrix['omset']),
+        ];
+
+        // Calculate priority vectors
+        $alternativesPriorityVectors = [
+            'jumlah_terjual' => calculatePriorityVector($normalizedAlternativesMatrix['jumlah_terjual']),
+            'jumlah_pembeli' => calculatePriorityVector($normalizedAlternativesMatrix['jumlah_pembeli']),
+            'omset' => calculatePriorityVector($normalizedAlternativesMatrix['omset']),
+        ];
+
+        // Calculate the final scores for each alternative
+        $finalScores = array_fill(0, count($alternatives), 0);
+
+        foreach ($alternatives as $i => $alternative) {
+            $finalScores[$i] =
+                $request->weights[0] * $alternativesPriorityVectors['jumlah_terjual'][$i] +
+                $request->weights[1] * $alternativesPriorityVectors['jumlah_pembeli'][$i] +
+                $request->weights[2] * $alternativesPriorityVectors['omset'][$i];
+
+            echo "Final score for {$alternative[0]}: " . round($finalScores[$i], 3) . "\n";
+            Log::info("Final score for {$alternative[0]}: " . round($finalScores[$i], 3));
+        }
+
+        // Log the normalized matrices
+        Log::info('Normalized Alternatives Matrix - Jumlah Terjual:', $normalizedAlternativesMatrix['jumlah_terjual']);
+        Log::info('Normalized Alternatives Matrix - Jumlah Pembeli:', $normalizedAlternativesMatrix['jumlah_pembeli']);
+        Log::info('Normalized Alternatives Matrix - Omset:', $normalizedAlternativesMatrix['omset']);
+
+        // Log the priority vectors
+        Log::info('Alternatives Priority Vector - Jumlah Terjual:', $alternativesPriorityVectors['jumlah_terjual']);
+        Log::info('Alternatives Priority Vector - Jumlah Pembeli:', $alternativesPriorityVectors['jumlah_pembeli']);
+        Log::info('Alternatives Priority Vector - Omset:', $alternativesPriorityVectors['omset']);
+
     }
-
-
-    // Calculate averages for each group
-    $averageJumlahTerjuals = calculateAverage($jumlahTerjuals);
-    $averageJumlahPembelis = calculateAverage($jumlahPembelis);
-    $averageOmsets = calculateAverage($omsets);
-
-    // Calculate Z-Score
-    $zscoreJumlahTerjuals = zscore($jumlahTerjuals);
-    $zscoreJumlahPembelis = zscore($jumlahPembelis);
-    $zscoreOmsets = zscore($omsets);
-
-    // Calculate Shift Normalization
-    $shiftedJumlahTerjuals = shiftNormalization($zscoreJumlahTerjuals);
-    $shiftedJumlahPembelis = shiftNormalization($zscoreJumlahPembelis);
-    $shiftedOmsets = shiftNormalization($zscoreOmsets);
-
-    // Calculate Entropy
-    $entropies[0] = calculateEntropySingle($shiftedJumlahTerjuals);
-    $entropies[1] = calculateEntropySingle($shiftedJumlahPembelis);
-    $entropies[2] = calculateEntropySingle($shiftedOmsets);
-
-    // Calculate Weights
-    $weights = calculateWeight($entropies);
-
-    // Log the results
-    Log::info('Z-Score Jumlah Terjuals:', $zscoreJumlahTerjuals);
-    Log::info('Z-Score Jumlah Pembelis:', $zscoreJumlahPembelis);
-    Log::info('Z-Score Omsets:', $zscoreOmsets);
-    Log::info('Shifted Jumlah Terjuals:', $shiftedJumlahTerjuals);
-    Log::info('Shifted Jumlah Pembelis:', $shiftedJumlahPembelis);
-    Log::info('Shifted Omsets:', $shiftedOmsets);
-    Log::info('Entropies:', $entropies);
-    Log::info('Weights:', $weights);
-
-
-    // Output the results
-    echo "Average Jumlah Terjuals: " . $averageJumlahTerjuals . "\n";
-    echo "Average Jumlah Pembelis: " . $averageJumlahPembelis . "\n";
-    echo "Average Omsets: " . $averageOmsets . "\n";
-}
-
-
 
 }
