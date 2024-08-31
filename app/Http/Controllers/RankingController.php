@@ -222,11 +222,9 @@ class RankingController extends Controller
 
     public function ahp(Request $request)
     {
-        $alternatives =  Dataset::all();
+        $alternatives = Dataset::all();
 
-        //log the request
         Log::info('Request:', $request->all());
-
 
         $alternativesMatrix = [
             'jumlah_terjual' => [],
@@ -234,7 +232,6 @@ class RankingController extends Controller
             'omset' => []
         ];
 
-        // Function to convert jumlah_terjual to score
         function convertJumlahTerjual($jumlah_terjual) {
             if ($jumlah_terjual < 400) return 1;
             if ($jumlah_terjual < 800) return 3;
@@ -243,7 +240,6 @@ class RankingController extends Controller
             return 9;
         }
 
-        // Function to convert jumlah_pembeli to score
         function convertJumlahPembeli($jumlah_pembeli) {
             if ($jumlah_pembeli < 25) return 1;
             if ($jumlah_pembeli < 50) return 3;
@@ -252,7 +248,6 @@ class RankingController extends Controller
             return 9;
         }
 
-        // Function to convert omset to score
         function convertOmset($omset) {
             if ($omset < 3000000) return 1;
             if ($omset < 7000000) return 3;
@@ -261,7 +256,31 @@ class RankingController extends Controller
             return 9;
         }
 
-        // Convert and populate alternativesMatrix with scores
+        foreach ($alternatives as $alternative) {
+            // Convert and add to alternativesMatrix
+            $convertedValueTerjual = convertJumlahTerjual($alternative->jumlah_terjual);
+            $convertedValuePembeli = convertJumlahPembeli($alternative->jumlah_pembeli);
+            $convertedValueOmset = convertOmset($alternative->omset);
+
+            $alternativesMatrix['jumlah_terjual'][] = [$convertedValueTerjual];
+            $alternativesMatrix['jumlah_pembeli'][] = [$convertedValuePembeli];
+            $alternativesMatrix['omset'][] = [$convertedValueOmset];
+
+            // Log the converted value
+            Log::info('Converted jumlah_terjual:', ['original' => $alternative->jumlah_terjual, 'converted' => $convertedValueTerjual]);
+            Log::info('Converted jumlah_pembeli:', ['original' => $alternative->jumlah_pembeli, 'converted' => $convertedValuePembeli]);
+            Log::info('Converted omset:', ['original' => $alternative->omset, 'converted' => $convertedValueOmset]);
+        }
+
+
+        // foreach ($alternativesMatrix['jumlah_pembeli'] as $row) {
+        //     Log::info('Alternatives Matrix - Jumlah Pembeli:', $row);
+        // }
+
+        // foreach ($alternativesMatrix['omset'] as $row) {
+        //     Log::info('Alternatives Matrix - Omset:', $row);
+        // }
+
         foreach ($alternatives as $i => $alternative) {
             foreach ($alternatives as $j => $alt) {
                 // For jumlah_terjual
@@ -269,10 +288,10 @@ class RankingController extends Controller
                 $den = convertJumlahTerjual($alt['jumlah_terjual']);
                 if ($num > $den) {
                     $result = $num / $den;
-                    $alternativesMatrix['jumlah_terjual'][$i][$j] = ceil($result) % 2 == 0 ? ceil($result) + 1 : ceil($result);
+                    $alternativesMatrix['jumlah_terjual'][$i][$j] = (fmod($result, 1) === 0.0) ? $result : ceil($result);
                 } else {
-                    $result = 1 / ceil($den / $num);
-                    $alternativesMatrix['jumlah_terjual'][$i][$j] = $result;
+                    $result = $den / $num;
+                    $alternativesMatrix['jumlah_terjual'][$i][$j] = (fmod($result, 1) === 0.0) ? 1 / $result : 1 / ceil($result);
                 }
 
                 // For jumlah_pembeli
@@ -280,10 +299,10 @@ class RankingController extends Controller
                 $den = convertJumlahPembeli($alt['jumlah_pembeli']);
                 if ($num > $den) {
                     $result = $num / $den;
-                    $alternativesMatrix['jumlah_pembeli'][$i][$j] = ceil($result) % 2 == 0 ? ceil($result) + 1 : ceil($result);
+                    $alternativesMatrix['jumlah_pembeli'][$i][$j] = (fmod($result, 1) === 0.0) ? $result : ceil($result);
                 } else {
-                    $result = 1 / ceil($den / $num);
-                    $alternativesMatrix['jumlah_pembeli'][$i][$j] = $result;
+                    $result = $den / $num;
+                    $alternativesMatrix['jumlah_pembeli'][$i][$j] = (fmod($result, 1) === 0.0) ? 1 / $result : 1 / ceil($result);
                 }
 
                 // For omset
@@ -291,40 +310,76 @@ class RankingController extends Controller
                 $den = convertOmset($alt['omset']);
                 if ($num > $den) {
                     $result = $num / $den;
-                    $alternativesMatrix['omset'][$i][$j] = ceil($result) % 2 == 0 ? ceil($result) + 1 : ceil($result);
+                    $alternativesMatrix['omset'][$i][$j] = (fmod($result, 1) === 0.0) ? $result : ceil($result);
                 } else {
-                    $result = 1 / ceil($den / $num);
-                    $alternativesMatrix['omset'][$i][$j] = $result;
+                    $result = $den / $num;
+                    $alternativesMatrix['omset'][$i][$j] = (fmod($result, 1) === 0.0) ? 1 / $result : 1 / ceil($result);
                 }
             }
         }
 
-        // Log the alternativesMatrix
-        Log::info('Alternatives Matrix - Jumlah Terjual:', $alternativesMatrix['jumlah_terjual']);
-        Log::info('Alternatives Matrix - Jumlah Pembeli:', $alternativesMatrix['jumlah_pembeli']);
-        Log::info('Alternatives Matrix - Omset:', $alternativesMatrix['omset']);
+        // // Log the converted scores
+        // Log::info('Converted Scores - Jumlah Terjual:', $alternativesMatrix['jumlah_terjual']);
+        // Log::info('Converted Scores - Jumlah Pembeli:', $alternativesMatrix['jumlah_pembeli']);
+        // Log::info('Converted Scores - Omset:', $alternativesMatrix['omset']);
 
-        // Optionally, you can also echo the matrices
-        echo "Alternatives Matrix - Jumlah Terjual:\n";
-        print_r($alternativesMatrix['jumlah_terjual']);
+        // Log the alternativesMatrix by item row
+        foreach ($alternativesMatrix['jumlah_pembeli'] as $row) {
+            Log::info('Alternatives Matrix - Jumlah Pembeli:', $row);
+        }
+        foreach ($alternativesMatrix['jumlah_terjual'] as $row) {
+            Log::info('Alternatives Matrix - Jumlah Terjual:', $row);
+        }
+        foreach ($alternativesMatrix['omset'] as $row) {
+            Log::info('Alternatives Matrix - Omset:', $row);
+        }
+        // Log::info('Alternatives Matrix - Jumlah Terjual:', $alternativesMatrix['jumlah_terjual']);
+        // Log::info('Alternatives Matrix - Jumlah Pembeli:', $alternativesMatrix['jumlah_pembeli']);
+        // Log::info('Alternatives Matrix - Omset:', $alternativesMatrix['omset']);
 
-        echo "Alternatives Matrix - Jumlah Pembeli:\n";
-        print_r($alternativesMatrix['jumlah_pembeli']);
+        // // Optionally, you can also echo the matrices
+        // echo "Alternatives Matrix - Jumlah Terjual:\n";
+        // print_r($alternativesMatrix['jumlah_terjual']);
 
-        echo "Alternatives Matrix - Omset:\n";
-        print_r($alternativesMatrix['omset']);
+        // echo "Alternatives Matrix - Jumlah Pembeli:\n";
+        // print_r($alternativesMatrix['jumlah_pembeli']);
+
+        // echo "Alternatives Matrix - Omset:\n";
+        // print_r($alternativesMatrix['omset']);
+
+        // function normalizeMatrix($matrix)
+        // {
+        //     $normalizedMatrix = [];
+        //     $columnSums = array_fill(0, count($matrix), 0);
+
+        //     foreach ($matrix as $row) {
+        //         foreach ($row as $j => $value) {
+        //             $columnSums[$j] += $value;
+        //         }
+        //     }
+
+        //     foreach ($matrix as $i => $row) {
+        //         foreach ($row as $j => $value) {
+        //             $normalizedMatrix[$i][$j] = $value / $columnSums[$j];
+        //         }
+        //     }
+
+        //     return $normalizedMatrix;
+        // }
 
         function normalizeMatrix($matrix)
         {
             $normalizedMatrix = [];
-            $columnSums = array_fill(0, count($matrix), 0);
+            $columnSums = array_fill(0, count($matrix[0]), 0); // Adjust to count columns correctly
 
+            // Calculate the sum of each column
             foreach ($matrix as $row) {
                 foreach ($row as $j => $value) {
                     $columnSums[$j] += $value;
                 }
             }
 
+            // Normalize the matrix by dividing each element by the column sum
             foreach ($matrix as $i => $row) {
                 foreach ($row as $j => $value) {
                     $normalizedMatrix[$i][$j] = $value / $columnSums[$j];
@@ -334,12 +389,16 @@ class RankingController extends Controller
             return $normalizedMatrix;
         }
 
+
         function calculatePriorityVector($matrix)
         {
             $priorityVector = [];
 
             foreach ($matrix as $row) {
                 $priorityVector[] = array_sum($row) / count($row);
+                // Log::info('Array Sum : ' , array_sum($row));
+                echo "Array Sum : " . array_sum($row) . "\n";
+                echo "Count : " . count($row) . "\n";
             }
 
             return $priorityVector;
@@ -368,7 +427,7 @@ class RankingController extends Controller
                 $request->weights[1] * $alternativesPriorityVectors['jumlah_pembeli'][$i] +
                 $request->weights[2] * $alternativesPriorityVectors['omset'][$i];
 
-            echo "Final score for {$alternative[0]}: " . round($finalScores[$i], 3) . "\n";
+            // echo "Final score for {$alternative[0]}: " . round($finalScores[$i], 3) . "\n";
             Log::info("Final score for {$alternative[0]}: " . round($finalScores[$i], 3));
         }
 
