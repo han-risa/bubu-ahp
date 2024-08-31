@@ -34,9 +34,3 @@
     ```bash
     php artisan serve
     ```
-
-7. Login credentials
-
-**Email:** user@gmail.com
-
-**Password:** password
