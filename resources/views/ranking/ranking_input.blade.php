@@ -98,8 +98,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             flatpickr('#bulan-penjualan', {
-                enableTime: true,
-                dateFormat: "Y-m-d H:i",
+                enableTime: 'false',
+                dateFormat: "m/Y",
             });
         });
     </script>

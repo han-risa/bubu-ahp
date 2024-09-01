@@ -79,6 +79,10 @@ class RankingController extends Controller
     {
         $dataset = Dataset::all();
 
+        $data = $request->all();
+
+        Log::info('Request:', $data);
+
         // Convert the dataset to an array
         $dataset = $dataset->toArray();
 
@@ -125,6 +129,7 @@ class RankingController extends Controller
             $zScores = array_map(function($value) use ($mean, $standardDeviation) {
                 return ($standardDeviation != 0) ? ($value - $mean) / $standardDeviation : 0;
             }, $data);
+
 
             return $zScores;
         }
@@ -177,7 +182,6 @@ class RankingController extends Controller
             return $weights;
         }
 
-
         // Calculate averages for each group
         $averageJumlahTerjuals = calculateAverage($jumlahTerjuals);
         $averageJumlahPembelis = calculateAverage($jumlahPembelis);
@@ -200,22 +204,6 @@ class RankingController extends Controller
 
         // Calculate Weights
         $weights = calculateWeight($entropies);
-
-        // Log the results
-        Log::info('Z-Score Jumlah Terjuals:', $zscoreJumlahTerjuals);
-        Log::info('Z-Score Jumlah Pembelis:', $zscoreJumlahPembelis);
-        Log::info('Z-Score Omsets:', $zscoreOmsets);
-        Log::info('Shifted Jumlah Terjuals:', $shiftedJumlahTerjuals);
-        Log::info('Shifted Jumlah Pembelis:', $shiftedJumlahPembelis);
-        Log::info('Shifted Omsets:', $shiftedOmsets);
-        Log::info('Entropies:', $entropies);
-        Log::info('Weights:', $weights);
-
-
-        // Output the results
-        echo "Average Jumlah Terjuals: " . $averageJumlahTerjuals . "\n";
-        echo "Average Jumlah Pembelis: " . $averageJumlahPembelis . "\n";
-        echo "Average Omsets: " . $averageOmsets . "\n";
 
         return redirect()->route('ranking.ahp', compact('weights'));
     }
@@ -255,44 +243,6 @@ class RankingController extends Controller
             if ($omset < 15000000) return 7;
             return 9;
         }
-
-        // foreach ($alternatives as $alternative) {
-        //     // Convert and add to alternativesMatrix
-        //     $convertedValueTerjual = convertJumlahTerjual($alternative->jumlah_terjual);
-        //     $convertedValuePembeli = convertJumlahPembeli($alternative->jumlah_pembeli);
-        //     $convertedValueOmset = convertOmset($alternative->omset);
-
-        //     $alternativesMatrix['jumlah_terjual'][] = [$convertedValueTerjual];
-        //     $alternativesMatrix['jumlah_pembeli'][] = [$convertedValuePembeli];
-        //     $alternativesMatrix['omset'][] = [$convertedValueOmset];
-
-        //     // Log the converted value
-        //     // Log::info('Converted jumlah_terjual:', ['original' => $alternative->jumlah_terjual, 'converted' => $convertedValueTerjual]);
-        //     // Log::info('Converted omset:', ['original' => $alternative->omset, 'converted' => $convertedValueOmset]);
-        // }
-
-        // Log::info('Alternatives Matrix - Jumlah Terjual:', $alternativesMatrix['jumlah_terjual']);
-        // Log::info('Alternatives Matrix - Jumlah Pembeli:', $alternativesMatrix['jumlah_pembeli']);
-        // Log::info('Alternatives Matrix - Omset:', $alternativesMatrix['omset']);
-
-        // foreach ($alternatives as $alternative) {
-        //     $convertedValuePembeli = convertJumlahPembeli($alternative->jumlah_pembeli);
-        //     $alternativesMatrix['jumlah_pembeli'][] = [$convertedValuePembeli];
-        //     Log::info('Converted jumlah_pembeli:', ['original' => $alternative->jumlah_pembeli, 'converted' => $convertedValuePembeli]);
-        // }
-
-        // foreach ($alternatives as $alternative) {
-        //     # code...
-        // }
-
-
-        // foreach ($alternativesMatrix['jumlah_pembeli'] as $row) {
-        //     Log::info('Alternatives Matrix - Jumlah Pembeli:', $row);
-        // }
-
-        // foreach ($alternativesMatrix['omset'] as $row) {
-        //     Log::info('Alternatives Matrix - Omset:', $row);
-        // }
 
         foreach ($alternatives as $i => $alternative) {
             foreach ($alternatives as $j => $alt) {
@@ -342,55 +292,6 @@ class RankingController extends Controller
 
         // Log the resulting matrix
         Log::info('Alternatives Matrix', $alternativesMatrix);
-
-        // // Log the converted scores
-        // Log::info('Converted Scores - Jumlah Terjual:', $alternativesMatrix['jumlah_terjual']);
-        // Log::info('Converted Scores - Jumlah Pembeli:', $alternativesMatrix['jumlah_pembeli']);
-        // Log::info('Converted Scores - Omset:', $alternativesMatrix['omset']);
-
-        // Log the alternativesMatrix by item row
-        // foreach ($alternativesMatrix['jumlah_pembeli'] as $row) {
-        //     Log::info('Alternatives Matrix - Jumlah Pembeli:', $row);
-        // }
-        // foreach ($alternativesMatrix['jumlah_terjual'] as $row) {
-        //     Log::info('Alternatives Matrix - Jumlah Terjual:', $row);
-        // }
-        // foreach ($alternativesMatrix['omset'] as $row) {
-        //     Log::info('Alternatives Matrix - Omset:', $row);
-        // }
-        // Log::info('Alternatives Matrix - Jumlah Terjual:', $alternativesMatrix['jumlah_terjual']);
-        // Log::info('Alternatives Matrix - Jumlah Pembeli:', $alternativesMatrix['jumlah_pembeli']);
-        // Log::info('Alternatives Matrix - Omset:', $alternativesMatrix['omset']);
-
-        // // Optionally, you can also echo the matrices
-        // echo "Alternatives Matrix - Jumlah Terjual:\n";
-        // print_r($alternativesMatrix['jumlah_terjual']);
-
-        // echo "Alternatives Matrix - Jumlah Pembeli:\n";
-        // print_r($alternativesMatrix['jumlah_pembeli']);
-
-        // echo "Alternatives Matrix - Omset:\n";
-        // print_r($alternativesMatrix['omset']);
-
-        // function normalizeMatrix($matrix)
-        // {
-        //     $normalizedMatrix = [];
-        //     $columnSums = array_fill(0, count($matrix), 0);
-
-        //     foreach ($matrix as $row) {
-        //         foreach ($row as $j => $value) {
-        //             $columnSums[$j] += $value;
-        //         }
-        //     }
-
-        //     foreach ($matrix as $i => $row) {
-        //         foreach ($row as $j => $value) {
-        //             $normalizedMatrix[$i][$j] = $value / $columnSums[$j];
-        //         }
-        //     }
-
-        //     return $normalizedMatrix;
-        // }
 
         function normalizeMatrix($matrix)
         {
@@ -455,17 +356,6 @@ class RankingController extends Controller
             // echo "Final score for {$alternative[0]}: " . round($finalScores[$i], 3) . "\n";
             Log::info("Final score for {$alternative[0]}: " . round($finalScores[$i], 3));
         }
-
-        // Log the normalized matrices
-        Log::info('Normalized Alternatives Matrix - Jumlah Terjual:', $normalizedAlternativesMatrix['jumlah_terjual']);
-        Log::info('Normalized Alternatives Matrix - Jumlah Pembeli:', $normalizedAlternativesMatrix['jumlah_pembeli']);
-        Log::info('Normalized Alternatives Matrix - Omset:', $normalizedAlternativesMatrix['omset']);
-
-        // Log the priority vectors
-        Log::info('Alternatives Priority Vector - Jumlah Terjual:', $alternativesPriorityVectors['jumlah_terjual']);
-        Log::info('Alternatives Priority Vector - Jumlah Pembeli:', $alternativesPriorityVectors['jumlah_pembeli']);
-        Log::info('Alternatives Priority Vector - Omset:', $alternativesPriorityVectors['omset']);
-
     }
 
 }
