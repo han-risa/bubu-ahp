@@ -58,7 +58,7 @@
                         </tbody>
                     </table>
                     <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-danger">Apply Bulk Action</button>
+                        <button type="submit" class="btn btn-danger">Submit</button>
                     </div>
                 </form>
 

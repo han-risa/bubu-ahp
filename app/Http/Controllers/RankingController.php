@@ -256,21 +256,34 @@ class RankingController extends Controller
             return 9;
         }
 
-        foreach ($alternatives as $alternative) {
-            // Convert and add to alternativesMatrix
-            $convertedValueTerjual = convertJumlahTerjual($alternative->jumlah_terjual);
-            $convertedValuePembeli = convertJumlahPembeli($alternative->jumlah_pembeli);
-            $convertedValueOmset = convertOmset($alternative->omset);
+        // foreach ($alternatives as $alternative) {
+        //     // Convert and add to alternativesMatrix
+        //     $convertedValueTerjual = convertJumlahTerjual($alternative->jumlah_terjual);
+        //     $convertedValuePembeli = convertJumlahPembeli($alternative->jumlah_pembeli);
+        //     $convertedValueOmset = convertOmset($alternative->omset);
 
-            $alternativesMatrix['jumlah_terjual'][] = [$convertedValueTerjual];
-            $alternativesMatrix['jumlah_pembeli'][] = [$convertedValuePembeli];
-            $alternativesMatrix['omset'][] = [$convertedValueOmset];
+        //     $alternativesMatrix['jumlah_terjual'][] = [$convertedValueTerjual];
+        //     $alternativesMatrix['jumlah_pembeli'][] = [$convertedValuePembeli];
+        //     $alternativesMatrix['omset'][] = [$convertedValueOmset];
 
-            // Log the converted value
-            Log::info('Converted jumlah_terjual:', ['original' => $alternative->jumlah_terjual, 'converted' => $convertedValueTerjual]);
-            Log::info('Converted jumlah_pembeli:', ['original' => $alternative->jumlah_pembeli, 'converted' => $convertedValuePembeli]);
-            Log::info('Converted omset:', ['original' => $alternative->omset, 'converted' => $convertedValueOmset]);
-        }
+        //     // Log the converted value
+        //     // Log::info('Converted jumlah_terjual:', ['original' => $alternative->jumlah_terjual, 'converted' => $convertedValueTerjual]);
+        //     // Log::info('Converted omset:', ['original' => $alternative->omset, 'converted' => $convertedValueOmset]);
+        // }
+
+        // Log::info('Alternatives Matrix - Jumlah Terjual:', $alternativesMatrix['jumlah_terjual']);
+        // Log::info('Alternatives Matrix - Jumlah Pembeli:', $alternativesMatrix['jumlah_pembeli']);
+        // Log::info('Alternatives Matrix - Omset:', $alternativesMatrix['omset']);
+
+        // foreach ($alternatives as $alternative) {
+        //     $convertedValuePembeli = convertJumlahPembeli($alternative->jumlah_pembeli);
+        //     $alternativesMatrix['jumlah_pembeli'][] = [$convertedValuePembeli];
+        //     Log::info('Converted jumlah_pembeli:', ['original' => $alternative->jumlah_pembeli, 'converted' => $convertedValuePembeli]);
+        // }
+
+        // foreach ($alternatives as $alternative) {
+        //     # code...
+        // }
 
 
         // foreach ($alternativesMatrix['jumlah_pembeli'] as $row) {
@@ -284,39 +297,51 @@ class RankingController extends Controller
         foreach ($alternatives as $i => $alternative) {
             foreach ($alternatives as $j => $alt) {
                 // For jumlah_terjual
-                $num = convertJumlahTerjual($alternative['jumlah_terjual']);
-                $den = convertJumlahTerjual($alt['jumlah_terjual']);
+                $num = convertJumlahTerjual($alternative->jumlah_terjual);
+                $den = convertJumlahTerjual($alt->jumlah_terjual);
+
                 if ($num > $den) {
                     $result = $num / $den;
-                    $alternativesMatrix['jumlah_terjual'][$i][$j] = (fmod($result, 1) === 0.0) ? $result : ceil($result);
+                    $roundedResult = ceil($result);
+                    $alternativesMatrix['jumlah_terjual'][$i][$j] = ($roundedResult % 2 === 0) ? $roundedResult + 1 : $roundedResult;
                 } else {
                     $result = $den / $num;
-                    $alternativesMatrix['jumlah_terjual'][$i][$j] = (fmod($result, 1) === 0.0) ? 1 / $result : 1 / ceil($result);
+                    $roundedResult = ceil($result);
+                    $alternativesMatrix['jumlah_terjual'][$i][$j] = 1 / (($roundedResult % 2 === 0) ? $roundedResult + 1 : $roundedResult);
                 }
 
                 // For jumlah_pembeli
-                $num = convertJumlahPembeli($alternative['jumlah_pembeli']);
-                $den = convertJumlahPembeli($alt['jumlah_pembeli']);
+                $num = convertJumlahPembeli($alternative->jumlah_pembeli);
+                $den = convertJumlahPembeli($alt->jumlah_pembeli);
+
                 if ($num > $den) {
                     $result = $num / $den;
-                    $alternativesMatrix['jumlah_pembeli'][$i][$j] = (fmod($result, 1) === 0.0) ? $result : ceil($result);
+                    $roundedResult = ceil($result);
+                    $alternativesMatrix['jumlah_pembeli'][$i][$j] = ($roundedResult % 2 === 0) ? $roundedResult + 1 : $roundedResult;
                 } else {
                     $result = $den / $num;
-                    $alternativesMatrix['jumlah_pembeli'][$i][$j] = (fmod($result, 1) === 0.0) ? 1 / $result : 1 / ceil($result);
+                    $roundedResult = ceil($result);
+                    $alternativesMatrix['jumlah_pembeli'][$i][$j] = 1 / (($roundedResult % 2 === 0) ? $roundedResult + 1 : $roundedResult);
                 }
 
                 // For omset
-                $num = convertOmset($alternative['omset']);
-                $den = convertOmset($alt['omset']);
+                $num = convertOmset($alternative->omset);
+                $den = convertOmset($alt->omset);
+
                 if ($num > $den) {
                     $result = $num / $den;
-                    $alternativesMatrix['omset'][$i][$j] = (fmod($result, 1) === 0.0) ? $result : ceil($result);
+                    $roundedResult = ceil($result);
+                    $alternativesMatrix['omset'][$i][$j] = ($roundedResult % 2 === 0) ? $roundedResult + 1 : $roundedResult;
                 } else {
                     $result = $den / $num;
-                    $alternativesMatrix['omset'][$i][$j] = (fmod($result, 1) === 0.0) ? 1 / $result : 1 / ceil($result);
+                    $roundedResult = ceil($result);
+                    $alternativesMatrix['omset'][$i][$j] = 1 / (($roundedResult % 2 === 0) ? $roundedResult + 1 : $roundedResult);
                 }
             }
         }
+
+        // Log the resulting matrix
+        Log::info('Alternatives Matrix', $alternativesMatrix);
 
         // // Log the converted scores
         // Log::info('Converted Scores - Jumlah Terjual:', $alternativesMatrix['jumlah_terjual']);
@@ -324,15 +349,15 @@ class RankingController extends Controller
         // Log::info('Converted Scores - Omset:', $alternativesMatrix['omset']);
 
         // Log the alternativesMatrix by item row
-        foreach ($alternativesMatrix['jumlah_pembeli'] as $row) {
-            Log::info('Alternatives Matrix - Jumlah Pembeli:', $row);
-        }
-        foreach ($alternativesMatrix['jumlah_terjual'] as $row) {
-            Log::info('Alternatives Matrix - Jumlah Terjual:', $row);
-        }
-        foreach ($alternativesMatrix['omset'] as $row) {
-            Log::info('Alternatives Matrix - Omset:', $row);
-        }
+        // foreach ($alternativesMatrix['jumlah_pembeli'] as $row) {
+        //     Log::info('Alternatives Matrix - Jumlah Pembeli:', $row);
+        // }
+        // foreach ($alternativesMatrix['jumlah_terjual'] as $row) {
+        //     Log::info('Alternatives Matrix - Jumlah Terjual:', $row);
+        // }
+        // foreach ($alternativesMatrix['omset'] as $row) {
+        //     Log::info('Alternatives Matrix - Omset:', $row);
+        // }
         // Log::info('Alternatives Matrix - Jumlah Terjual:', $alternativesMatrix['jumlah_terjual']);
         // Log::info('Alternatives Matrix - Jumlah Pembeli:', $alternativesMatrix['jumlah_pembeli']);
         // Log::info('Alternatives Matrix - Omset:', $alternativesMatrix['omset']);

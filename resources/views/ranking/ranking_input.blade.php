@@ -68,7 +68,15 @@
                                         </div>
                                     </div>
                                 @endforeach
-
+                                <div class="row">
+                                    <div class="col-12 d-flex justify-content-end">
+                                        <div class="form-group">
+                                            <label for="bulan-penjualan">Bulan Penjualan</label>
+                                            <small class="text-muted">Format : bb/tttt</small>
+                                            <input type="text" id="bulan-penjualan" class="form-control" placeholder="Pilih bulan penjualan" name="bulan_penjualan">
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-12 d-flex justify-content-end">
                                     <button type="submit" class="btn btn-primary me-1 mb-1">Submit</button>
                                     <button type="reset" class="btn btn-light-secondary me-1 mb-1">Reset</button>
