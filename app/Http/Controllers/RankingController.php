@@ -211,6 +211,7 @@ class RankingController extends Controller
     public function ahp(Request $request)
     {
         $alternatives = Dataset::all();
+        $desain = $request->desain;
 
         Log::info('Request:', $request->all());
 
@@ -322,9 +323,6 @@ class RankingController extends Controller
 
             foreach ($matrix as $row) {
                 $priorityVector[] = array_sum($row) / count($row);
-                // Log::info('Array Sum : ' , array_sum($row));
-                echo "Array Sum : " . array_sum($row) . "\n";
-                echo "Count : " . count($row) . "\n";
             }
 
             return $priorityVector;
@@ -355,7 +353,35 @@ class RankingController extends Controller
 
             // echo "Final score for {$alternative[0]}: " . round($finalScores[$i], 3) . "\n";
             Log::info("Final score for {$alternative[0]}: " . round($finalScores[$i], 3));
+
         }
+
+        // Sort final scores in descending order while maintaining their original indexes
+        arsort($finalScores);
+
+        // Get nama_desain from Dataset Model
+        $desain = Dataset::all('nama_desain')->pluck('nama_desain')->toArray();
+
+        // Combine $desain, $finalScores, and $rankedScores into one array
+        $rankedData = [];
+        $rank = 1;
+
+        foreach ($finalScores as $i => $score) {
+            $rankedData[] = [
+                'nama_desain' => $desain[$i],
+                'final_score' => $score,
+                'rank' => $rank++
+            ];
+        }
+
+        return view('ranking.ranking_hasil', compact('rankedData'));
+    }
+
+    public function hasil(Request $request)
+    {
+        $result = $request->input('result');
+
+        return view('ranking.ranking_hasil', compact('result'));
     }
 
 }
