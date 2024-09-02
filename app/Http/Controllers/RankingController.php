@@ -72,31 +72,26 @@ class RankingController extends Controller
 
         // You can now use these arrays for further processing, saving to the database, etc.
 
-        return redirect()->route('ranking.index')->with('success', 'Data has been processed successfully.');
+        return redirect()->route('ranking.entropy', compact('perItemArray', 'groupedArray'))->with('success', 'Data has been processed successfully.');
     }
 
     public function entropy(Request $request)
     {
-        $dataset = Dataset::all();
+        $dataset = $request->input('groupedArray');
 
-        $data = $request->all();
+        $data = $request->input('perItemArray');
 
         Log::info('Request:', $data);
-
-        // Convert the dataset to an array
-        $dataset = $dataset->toArray();
 
         // Initialize arrays for jumlah_terjual, jumlah_pembeli, and omset
         $jumlahTerjuals = [];
         $jumlahPembelis = [];
         $omsets = [];
 
-        // Loop through the dataset and populate the arrays
-        foreach ($dataset as $data) {
-            $jumlahTerjuals[] = $data['jumlah_terjual'];
-            $jumlahPembelis[] = $data['jumlah_pembeli'];
-            $omsets[] = $data['omset'];
-        }
+        $jumlahTerjuals = $dataset['jumlah_terjuals'];
+        $jumlahPembelis = $dataset['jumlah_pembelis'];
+        $omsets = $dataset['omsets'];
+
 
         // Function to calculate the average value of an array
         function calculateAverage($array) {
@@ -205,13 +200,12 @@ class RankingController extends Controller
         // Calculate Weights
         $weights = calculateWeight($entropies);
 
-        return redirect()->route('ranking.ahp', compact('weights'));
+        return redirect()->route('ranking.ahp', compact('weights', 'data'));
     }
 
     public function ahp(Request $request)
     {
-        $alternatives = Dataset::all();
-        $desain = $request->desain;
+        $alternatives = $request->input('data');
 
         Log::info('Request:', $request->all());
 
@@ -248,8 +242,8 @@ class RankingController extends Controller
         foreach ($alternatives as $i => $alternative) {
             foreach ($alternatives as $j => $alt) {
                 // For jumlah_terjual
-                $num = convertJumlahTerjual($alternative->jumlah_terjual);
-                $den = convertJumlahTerjual($alt->jumlah_terjual);
+                $num = convertJumlahTerjual($alternative['jumlah_terjual']);
+                $den = convertJumlahTerjual($alt['jumlah_terjual']);
 
                 if ($num > $den) {
                     $result = $num / $den;
@@ -262,8 +256,8 @@ class RankingController extends Controller
                 }
 
                 // For jumlah_pembeli
-                $num = convertJumlahPembeli($alternative->jumlah_pembeli);
-                $den = convertJumlahPembeli($alt->jumlah_pembeli);
+                $num = convertJumlahPembeli($alternative['jumlah_pembeli']);
+                $den = convertJumlahPembeli($alt['jumlah_pembeli']);
 
                 if ($num > $den) {
                     $result = $num / $den;
@@ -276,8 +270,8 @@ class RankingController extends Controller
                 }
 
                 // For omset
-                $num = convertOmset($alternative->omset);
-                $den = convertOmset($alt->omset);
+                $num = convertOmset($alternative['omset']);
+                $den = convertOmset($alt['omset']);
 
                 if ($num > $den) {
                     $result = $num / $den;
@@ -290,6 +284,8 @@ class RankingController extends Controller
                 }
             }
         }
+
+
 
         // Log the resulting matrix
         Log::info('Alternatives Matrix', $alternativesMatrix);
@@ -350,17 +346,16 @@ class RankingController extends Controller
                 $request->weights[0] * $alternativesPriorityVectors['jumlah_terjual'][$i] +
                 $request->weights[1] * $alternativesPriorityVectors['jumlah_pembeli'][$i] +
                 $request->weights[2] * $alternativesPriorityVectors['omset'][$i];
-
-            // echo "Final score for {$alternative[0]}: " . round($finalScores[$i], 3) . "\n";
-            Log::info("Final score for {$alternative[0]}: " . round($finalScores[$i], 3));
-
         }
 
         // Sort final scores in descending order while maintaining their original indexes
         arsort($finalScores);
 
         // Get nama_desain from Dataset Model
-        $desain = Dataset::all('nama_desain')->pluck('nama_desain')->toArray();
+        foreach ($alternatives as $item) {
+            $desainName = Desain::find($item['id'])->nama_desain;
+            $desainNames[] = $desainName;
+        }
 
         // Combine $desain, $finalScores, and $rankedScores into one array
         $rankedData = [];
@@ -368,7 +363,7 @@ class RankingController extends Controller
 
         foreach ($finalScores as $i => $score) {
             $rankedData[] = [
-                'nama_desain' => $desain[$i],
+                'nama_desain' => $desainNames[$i],
                 'final_score' => $score,
                 'rank' => $rank++
             ];
