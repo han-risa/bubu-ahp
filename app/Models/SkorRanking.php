@@ -15,4 +15,14 @@ class SkorRanking extends Model
         'skor_ranking',
         'posisi_ranking',
     ];
+
+    public function desain()
+    {
+        return $this->belongsTo(Desain::class, 'id_desain', 'id');
+    }
+
+    public function bulan()
+    {
+        return $this->belongsTo(BulanRanking::class, 'id_bulan', 'id');
+    }
 }

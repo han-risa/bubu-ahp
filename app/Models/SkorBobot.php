@@ -14,4 +14,14 @@ class SkorBobot extends Model
         'id_bulan',
         'skor_bobot',
     ];
+
+    public function kriteria()
+    {
+        return $this->belongsTo(Kriteria::class, 'id_kriteria', 'id');
+    }
+
+    public function bulan()
+    {
+        return $this->belongsTo(BulanRanking::class, 'id_bulan', 'id');
+    }
 }
