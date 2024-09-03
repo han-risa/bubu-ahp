@@ -15,13 +15,13 @@ return new class extends Migration
     {
         Schema::create('skor_bobots', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('kriteria_id');
             $table->unsignedBigInteger('bulan_id');
-            $table->double('skor_bobot');
+            $table->double('jumlah_terjual');
+            $table->double('jumlah_pembeli');
+            $table->double('omset');
             $table->timestamps();
 
             // Foreign Key Constraints
-            $table->foreign('kriteria_id')->references('id')->on('kriterias')->onDelete('cascade');
             $table->foreign('bulan_id')->references('id')->on('bulan_rankings')->onDelete('cascade');
 
         });

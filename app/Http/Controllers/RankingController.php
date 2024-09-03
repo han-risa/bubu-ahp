@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use App\Models\Desain;
-use App\Models\Dataset;
+use App\Models\SkorBobot;
+use App\Models\BulanRanking;
 use Illuminate\Support\Facades\Log;
 
 class RankingController extends Controller
@@ -41,6 +41,7 @@ class RankingController extends Controller
     public function process(Request $request)
     {
         $desainData = $request->input('desain'); // This will capture the array of inputs
+        $bulan = $request->input('bulan_penjualan');
 
         $perItemArray = []; // Array to hold data per item
         $groupedArray = [
@@ -71,6 +72,9 @@ class RankingController extends Controller
         Log::info('Grouped Array:', $groupedArray);
 
         // You can now use these arrays for further processing, saving to the database, etc.
+        $data = new BulanRanking;
+        $data->bulan_penjualan = $bulan;
+        $data->save();
 
         return redirect()->route('ranking.entropy', compact('perItemArray', 'groupedArray'))->with('success', 'Data has been processed successfully.');
     }
@@ -199,6 +203,13 @@ class RankingController extends Controller
 
         // Calculate Weights
         $weights = calculateWeight($entropies);
+
+        // Store the weights to SkorBobot Model
+        $data = new SkorBobot;
+        $data->jumlah_terjual = $weights[0];
+        $data->jumlah_pembeli = $weights[1];
+        $data->omset = $weights[2];
+        $data->save();
 
         return redirect()->route('ranking.ahp', compact('weights', 'data'));
     }
