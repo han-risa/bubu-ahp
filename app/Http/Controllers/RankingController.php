@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Desain;
 use App\Models\SkorBobot;
+use App\Models\SkorRanking;
 use App\Models\BulanRanking;
 use Illuminate\Support\Facades\Log;
 
@@ -73,10 +74,13 @@ class RankingController extends Controller
 
         // You can now use these arrays for further processing, saving to the database, etc.
         $data = new BulanRanking;
-        $data->bulan_penjualan = $bulan;
+        $data->bulan_tahun = $bulan;
         $data->save();
+        $insertedId = $data->id;
+        // dd($insertedId);
 
-        return redirect()->route('ranking.entropy', compact('perItemArray', 'groupedArray'))->with('success', 'Data has been processed successfully.');
+
+        return redirect()->route('ranking.entropy', compact('perItemArray', 'groupedArray', 'insertedId'))->with('success', 'Data has been processed successfully.');
     }
 
     public function entropy(Request $request)
@@ -84,6 +88,8 @@ class RankingController extends Controller
         $dataset = $request->input('groupedArray');
 
         $data = $request->input('perItemArray');
+
+        $dateId = $request->input('insertedId');
 
         Log::info('Request:', $data);
 
@@ -205,18 +211,21 @@ class RankingController extends Controller
         $weights = calculateWeight($entropies);
 
         // Store the weights to SkorBobot Model
-        $data = new SkorBobot;
-        $data->jumlah_terjual = $weights[0];
-        $data->jumlah_pembeli = $weights[1];
-        $data->omset = $weights[2];
-        $data->save();
+        $dataBobot = new SkorBobot;
+        $dataBobot->jumlah_terjual = $weights[0];
+        $dataBobot->jumlah_pembeli = $weights[1];
+        $dataBobot->omset = $weights[2];
+        $dataBobot->bulan_id = $dateId;
+        $dataBobot->save();
 
-        return redirect()->route('ranking.ahp', compact('weights', 'data'));
+        return redirect()->route('ranking.ahp', compact('weights', 'data', 'dateId'));
     }
 
     public function ahp(Request $request)
     {
         $alternatives = $request->input('data');
+        $dateId = $request->input('dateId');
+        // dd($alternatives);
 
         Log::info('Request:', $request->all());
 
@@ -353,17 +362,23 @@ class RankingController extends Controller
         $finalScores = array_fill(0, count($alternatives), 0);
 
         foreach ($alternatives as $i => $alternative) {
-            $finalScores[$i] =
-                $request->weights[0] * $alternativesPriorityVectors['jumlah_terjual'][$i] +
-                $request->weights[1] * $alternativesPriorityVectors['jumlah_pembeli'][$i] +
-                $request->weights[2] * $alternativesPriorityVectors['omset'][$i];
+            $finalScores[$i] = [
+                'id' => $alternative['id'],
+                'score' =>
+                    $request->weights[0] * $alternativesPriorityVectors['jumlah_terjual'][$i] +
+                    $request->weights[1] * $alternativesPriorityVectors['jumlah_pembeli'][$i] +
+                    $request->weights[2] * $alternativesPriorityVectors['omset'][$i]
+            ];
         }
 
+
         // Sort final scores in descending order while maintaining their original indexes
+        // dd($finalScores);
         arsort($finalScores);
+        // dd($finalScores);
 
         // Get nama_desain from Dataset Model
-        foreach ($alternatives as $item) {
+        foreach ($finalScores as $item) {
             $desainName = Desain::find($item['id'])->nama_desain;
             $desainNames[] = $desainName;
         }
@@ -375,9 +390,16 @@ class RankingController extends Controller
         foreach ($finalScores as $i => $score) {
             $rankedData[] = [
                 'nama_desain' => $desainNames[$i],
-                'final_score' => $score,
-                'rank' => $rank++
+                'final_score' => $score['score'],
+                'rank' => $rank
             ];
+
+            $rankData = new SkorRanking;
+            $rankData->desain_id = $score['id'];
+            $rankData->bulan_id = $dateId;
+            $rankData->skor_ranking = $score['score'];
+            $rankData->posisi_ranking = $rank++;
+            $rankData->save();
         }
 
         return view('ranking.ranking_hasil', compact('rankedData'));
