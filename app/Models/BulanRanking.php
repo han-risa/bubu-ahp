@@ -15,11 +15,11 @@ class BulanRanking extends Model
 
     public function skor_bobot()
     {
-        return $this->hasMany(SkorBobot::class);
+        return $this->hasMany(SkorBobot::class, 'bulan_id', 'id');
     }
 
     public function skor_ranking()
     {
-        return $this->hasMany(SkorRanking::class);
+        return $this->hasMany(SkorRanking::class, 'bulan_id', 'id');
     }
 }

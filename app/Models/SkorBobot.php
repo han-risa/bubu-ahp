@@ -10,7 +10,7 @@ class SkorBobot extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id_bulan',
+        'bulan_id',
         'jumlah_terjual',
         'jumlah_pembeli',
         'omset',
@@ -18,6 +18,6 @@ class SkorBobot extends Model
 
     public function bulan()
     {
-        return $this->belongsTo(BulanRanking::class, 'id_bulan', 'id');
+        return $this->belongsTo(BulanRanking::class, 'bulan_id', 'id');
     }
 }

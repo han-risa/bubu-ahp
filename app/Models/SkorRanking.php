@@ -10,19 +10,19 @@ class SkorRanking extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id_desain',
-        'id_bulan',
+        'desain_id',
+        'bulan_id',
         'skor_ranking',
         'posisi_ranking',
     ];
 
     public function desain()
     {
-        return $this->belongsTo(Desain::class, 'id_desain', 'id');
+        return $this->belongsTo(Desain::class, 'desain_id', 'id');
     }
 
     public function bulan()
     {
-        return $this->belongsTo(BulanRanking::class, 'id_bulan', 'id');
+        return $this->belongsTo(BulanRanking::class, 'bulan_id', 'id');
     }
 }

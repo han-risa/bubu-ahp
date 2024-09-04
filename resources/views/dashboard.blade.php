@@ -38,7 +38,7 @@
                     </div>
                     <!-- Button 3 -->
                     <div class="col-md-4 col-12 d-flex justify-content-center">
-                        <a href="" class="text-white" style="font-size: 20px; text-decoration: none; width: 100%">
+                        <a href="{{ route('ranking.riwayat') }}" class="text-white" style="font-size: 20px; text-decoration: none; width: 100%">
                             <button class="btn btn-primary" style="width: 100%;">
                                 <i class="bi bi-bar-chart-line-fill" style="font-size: 100px"></i><br>Riwayat
                                 Perankingan

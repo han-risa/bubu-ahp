@@ -405,11 +405,12 @@ class RankingController extends Controller
         return view('ranking.ranking_hasil', compact('rankedData'));
     }
 
-    public function hasil(Request $request)
+    public function riwayat(Request $request)
     {
-        $result = $request->input('result');
+        // Get all SkorRanking data and group by bulan_id
+        $groupedData = SkorRanking::with(['desain', 'bulan'])->get()->groupBy('bulan_id');
+        // dd($groupedData);
 
-        return view('ranking.ranking_hasil', compact('result'));
+        return view('ranking.ranking_history', compact('groupedData'));
     }
-
 }

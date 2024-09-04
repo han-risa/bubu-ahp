@@ -12,4 +12,9 @@ class Desain extends Model
     protected $fillable = [
         'nama_desain',
     ];
+
+    public function skor_ranking()
+    {
+        return $this->hasMany(SkorRanking::class, 'desain_id', 'id');
+    }
 }

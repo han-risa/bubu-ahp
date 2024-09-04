@@ -32,3 +32,4 @@ Route::get('/ranking-hasil', [RankingController::class, 'hasil'])->name('ranking
 Route::post('/ranking-process', [RankingController::class, 'process'])->name('ranking.process');
 Route::get('/ranking-entropy', [RankingController::class, 'entropy'])->name('ranking.entropy');
 Route::get('/ranking-ahp', [RankingController::class, 'ahp'])->name('ranking.ahp');
+Route::get("/ranking-riwayat", [RankingController::class, 'riwayat'])->name('ranking.riwayat');
