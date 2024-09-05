@@ -1,26 +1,27 @@
 runtime: php
 env: flex
 
-runtime_config: document_root: public
+runtime_config:
+  document_root: public
 
 # Ensure we skip ".env", which is only for local development
 skip_files:
-    - .env
+  - .env
 
 automatic_scaling:
-    min_num_instances: 1
-    max_num_instances: 1
+  min_num_instances: 1
+  max_num_instances: 1
 
 resources:
-    cpu: 2
-    memory_gb: 4
-    disk_size_gb: 100
+  cpu: 2
+  memory_gb: 4
+  disk_size_gb: 100
 
 env_variables:
-    # Put production environment variables here.
-    APP_DEBUG: true
-    APP_ENV: production
-    APP_KEY: base64:teH/0+CIagNT/Gs0RJwQRNJzsag5FYF7znyS9p1l0L4=
-    APP_NAME: "AHP-ENTROPY"
+  # Put production environment variables here.
+  APP_DEBUG: true
+  APP_ENV: production
+  APP_KEY: base64:teH/0+CIagNT/Gs0RJwQRNJzsag5FYF7znyS9p1l0L4=
+  APP_NAME: "AHP-ENTROPY"
 
-    LOG_LEVEL: debug
+  LOG_LEVEL: debug
