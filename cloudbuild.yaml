@@ -11,4 +11,4 @@ steps:
 timeout: '3600s'
 
 options:
-  logging: NONE
+  logging: CLOUD_LOGGING_ONLY
