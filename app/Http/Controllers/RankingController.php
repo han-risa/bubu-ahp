@@ -373,9 +373,7 @@ class RankingController extends Controller
 
 
         // Sort final scores in descending order while maintaining their original indexes
-        // dd($finalScores);
         arsort($finalScores);
-        // dd($finalScores);
 
         // Get nama_desain from Dataset Model
         foreach ($finalScores as $item) {

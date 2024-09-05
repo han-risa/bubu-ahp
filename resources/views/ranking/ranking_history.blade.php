@@ -68,23 +68,4 @@
             });
         </script>
     @endforeach
-    <!-- SweetAlert2 Script -->
-<script>
-    function confirmDelete(id) {
-        Swal.fire({
-            title: 'Yakin Hapus Entry ini?',
-            text: "Data tidak akan dapat dipulihkan!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            cancelButtonText: 'Batal',
-            confirmButtonText: 'Ya, hapus data tersebut!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('delete-form-' + id).submit();
-            }
-        })
-    }
-    </script>
 </x-app-layout>
