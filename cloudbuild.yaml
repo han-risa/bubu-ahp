@@ -4,8 +4,9 @@ steps:
     args:
       - '-c'
       - |
-        gcloud config set app/cloud_build_timeout 3600 \
-        && gcloud app deploy -q --promote -v=$BUILD_ID \
+        gcloud config set app/project $PROJECT_ID \
+        && gcloud config set app/cloud_build_timeout 3600 \
+        && gcloud app deploy -q --no-promote --stop-previous-version --verbosity=debug -v=$BUILD_ID \
         --project=$PROJECT_ID
 
 timeout: '3600s'
